@@ -38,7 +38,7 @@ LABEL "provider"="Oracle"                                               \
 ENV ORACLE_BASE=/opt/oracle \
     ORACLE_HOME=/opt/oracle/product/18c/dbhomeXE \
     ORACLE_SID=XE \
-    INSTALL_FILE_1="oracle-database-xe-18c-1.0-1.x86_64.rpm" \
+    INSTALL_FILE_1="https://download.oracle.com/otn-pub/otn_software/db-express/oracle-database-xe-18c-1.0-1.x86_64.rpm" \
     RUN_FILE="runOracle.sh" \
     PWD_FILE="setPassword.sh" \
     CONF_FILE="oracle-xe-18c.conf" \
@@ -52,17 +52,16 @@ ENV PATH=$ORACLE_HOME/bin:$PATH
 
 # Copy binaries
 # -------------
-COPY $CHECK_SPACE_FILE $RUN_FILE $PWD_FILE $CHECK_DB_FILE $CONF_FILE $INSTALL_FILE_1 $INSTALL_DIR/
+COPY $CHECK_SPACE_FILE $RUN_FILE $PWD_FILE $CHECK_DB_FILE $CONF_FILE $INSTALL_DIR/
 
 RUN chmod ug+x $INSTALL_DIR/*.sh && \
     sync && \
     $INSTALL_DIR/$CHECK_SPACE_FILE && \
-    cd $INSTALL_DIR 
-RUN yum -y update    
-RUN yum -y install openssl oracle-database-preinstall-18c
-RUN sed -i -e 's/\(oracle\s\+hard\s\+nofile\)/# \1/' /etc/security/limits.d/oracle-database-preinstall-18c.conf 
-RUN yum -y localinstall $INSTALL_FILE_1
-RUN rm -rf /var/cache/yum && \
+    cd $INSTALL_DIR && \
+    yum -y install openssl oracle-database-preinstall-18c && \
+    sed -i -e 's/\(oracle\s\+hard\s\+nofile\)/# \1/' /etc/security/limits.d/oracle-database-preinstall-18c.conf && \
+    yum -y localinstall $INSTALL_FILE_1 && \
+    rm -rf /var/cache/yum && \
     rm -rf /var/tmp/yum-* && \
     mkdir -p $ORACLE_BASE/scripts/setup && \
     mkdir $ORACLE_BASE/scripts/startup && \
